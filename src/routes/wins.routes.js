@@ -5,7 +5,27 @@ import { authRequired } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
-// CREATE win
+/**
+ * READ all wins (PUBLIC Wall of Fame)
+ * GET /api/wins
+ */
+router.get("/", async (req, res) => {
+	try {
+		const db = getDb();
+		const wins = db.collection("wins");
+
+		const result = await wins.find({}).sort({ createdAt: -1 }).toArray();
+
+		res.json(result.map((w) => ({ ...w, userId: w.userId.toString() })));
+	} catch (err) {
+		res.status(500).json({ error: "Failed to fetch wins" });
+	}
+});
+
+/**
+ * CREATE win (AUTH)
+ * POST /api/wins
+ */
 router.post("/", authRequired, async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
@@ -41,7 +61,10 @@ router.post("/", authRequired, async (req, res) => {
 	});
 });
 
-// READ own wins
+/**
+ * READ own wins (AUTH)
+ * GET /api/wins/me
+ */
 router.get("/me", authRequired, async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
@@ -53,7 +76,10 @@ router.get("/me", authRequired, async (req, res) => {
 	res.json(result.map((w) => ({ ...w, userId: w.userId.toString() })));
 });
 
-// UPDATE win
+/**
+ * UPDATE win (AUTH)
+ * PUT /api/wins/:id
+ */
 router.put("/:id", authRequired, async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
@@ -90,7 +116,10 @@ router.put("/:id", authRequired, async (req, res) => {
 	res.json({ message: "Win updated" });
 });
 
-// DELETE win
+/**
+ * DELETE win (AUTH)
+ * DELETE /api/wins/:id
+ */
 router.delete("/:id", authRequired, async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
