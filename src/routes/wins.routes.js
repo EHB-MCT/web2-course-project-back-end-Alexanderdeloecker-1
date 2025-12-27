@@ -2,6 +2,8 @@ import { Router } from "express";
 import { ObjectId } from "mongodb";
 import { getDb } from "../db/mongo.js";
 import { authRequired } from "../middleware/auth.middleware.js";
+import cloudinary from "../utils/cloudinary.js";
+import { upload } from "../middleware/upload.middleware.js";
 
 const router = Router();
 
@@ -26,16 +28,11 @@ router.get("/", async (req, res) => {
  * CREATE win (AUTH)
  * POST /api/wins
  */
-router.post("/", authRequired, async (req, res) => {
+router.post("/", authRequired, upload.single("image"), async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
 
-	const {
-		title,
-		description = "",
-		category = "general",
-		proofUrl = "",
-	} = req.body;
+	const { title, description = "", category = "general" } = req.body;
 
 	if (!title || title.length < 3) {
 		return res
@@ -43,12 +40,23 @@ router.post("/", authRequired, async (req, res) => {
 			.json({ error: "Title must be at least 3 characters" });
 	}
 
+	let imageUrl = "";
+
+	if (req.file) {
+		const result = await cloudinary.uploader.upload(
+			`data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+			{ folder: "wall-of-fame" }
+		);
+
+		imageUrl = result.secure_url;
+	}
+
 	const win = {
 		userId: new ObjectId(req.auth.userId),
 		title,
 		description,
 		category,
-		proofUrl,
+		imageUrl,
 		createdAt: new Date(),
 	};
 
@@ -99,7 +107,7 @@ router.put("/:id", authRequired, async (req, res) => {
 		return res.status(403).json({ error: "Not your win" });
 	}
 
-	const { title, description, category, proofUrl } = req.body;
+	const { title, description, category, imageUrl } = req.body;
 
 	await wins.updateOne(
 		{ _id: win._id },
@@ -108,7 +116,7 @@ router.put("/:id", authRequired, async (req, res) => {
 				title: title ?? win.title,
 				description: description ?? win.description,
 				category: category ?? win.category,
-				proofUrl: proofUrl ?? win.proofUrl,
+				imageUrl: imageUrl ?? win.imageUrl,
 			},
 		}
 	);
