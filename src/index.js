@@ -14,10 +14,13 @@ const app = express();
 // middleware
 app.use(
 	cors({
-		origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+		origin: [
+			"http://localhost:5173",
+			"http://127.0.0.1:5173",
+			"https://wall-of-fame-api.onrender.com",
+		],
 		methods: ["GET", "POST", "PUT", "DELETE"],
 		allowedHeaders: ["Content-Type", "Authorization"],
-		credentials: true,
 	})
 );
 
