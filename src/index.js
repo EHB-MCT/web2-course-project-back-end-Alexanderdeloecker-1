@@ -12,7 +12,15 @@ dotenv.config();
 const app = express();
 
 // middleware
-app.use(cors());
+app.use(
+	cors({
+		origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+		methods: ["GET", "POST", "PUT", "DELETE"],
+		allowedHeaders: ["Content-Type", "Authorization"],
+		credentials: true,
+	})
+);
+
 app.use(express.json());
 
 // routes
@@ -20,14 +28,13 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/wins", winsRoutes);
 
-// health check (handig voor Render)
+// health check
 app.get("/", (req, res) => {
 	res.json({ status: "API is running" });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// connect DB first, then start server
 connectMongo().then(() => {
 	app.listen(PORT, () => {
 		console.log(`API running on port ${PORT}`);
