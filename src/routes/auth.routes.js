@@ -5,16 +5,20 @@ import { signToken } from "../utils/jwt.js";
 
 const router = Router();
 
+/**
+ * REGISTER
+ * POST /api/auth/register
+ */
 router.post("/register", async (req, res) => {
 	const db = getDb();
 	const users = db.collection("users");
 
-	const { email, password } = req.body;
+	const { email, password, name } = req.body;
 
 	// basic validation
-	if (!email || !password || password.length < 3) {
+	if (!email || !password || !name || password.length < 3) {
 		return res.status(400).json({
-			error: "Email and password required (min 3 chars)",
+			error: "Email, name and password required (min 3 chars)",
 		});
 	}
 
@@ -29,13 +33,15 @@ router.post("/register", async (req, res) => {
 	// hash password
 	const passwordHash = await bcrypt.hash(password, 10);
 
+	// create user
 	const result = await users.insertOne({
 		email,
+		name,
 		passwordHash,
 		createdAt: new Date(),
 	});
 
-	// auto-login after register (nice UX)
+	// auto-login after register
 	const token = signToken({
 		userId: result.insertedId.toString(),
 		email,
@@ -44,14 +50,27 @@ router.post("/register", async (req, res) => {
 	res.status(201).json({
 		message: "User registered",
 		token,
+		user: {
+			_id: result.insertedId,
+			name,
+			email,
+		},
 	});
 });
 
+/**
+ * LOGIN
+ * POST /api/auth/login
+ */
 router.post("/login", async (req, res) => {
 	const db = getDb();
 	const users = db.collection("users");
 
 	const { email, password } = req.body;
+
+	if (!email || !password) {
+		return res.status(400).json({ error: "Email and password required" });
+	}
 
 	const user = await users.findOne({ email });
 	if (!user) {

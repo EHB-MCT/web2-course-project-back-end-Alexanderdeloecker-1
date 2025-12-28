@@ -7,6 +7,36 @@ import { upload } from "../middleware/upload.middleware.js";
 
 const router = Router();
 
+/* ---------------- HELPERS ---------------- */
+const winWithUserPipeline = [
+	{
+		$lookup: {
+			from: "users",
+			localField: "userId",
+			foreignField: "_id",
+			as: "user",
+		},
+	},
+	{
+		$unwind: {
+			path: "$user",
+			preserveNullAndEmptyArrays: true,
+		},
+	},
+	{
+		$project: {
+			title: 1,
+			description: 1,
+			category: 1,
+			imageUrl: 1,
+			createdAt: 1,
+			userId: 1,
+			"user._id": 1,
+			"user.name": 1,
+		},
+	},
+];
+
 /**
  * READ all wins (PUBLIC Wall of Fame)
  * GET /api/wins
@@ -16,9 +46,17 @@ router.get("/", async (req, res) => {
 		const db = getDb();
 		const wins = db.collection("wins");
 
-		const result = await wins.find({}).sort({ createdAt: -1 }).toArray();
+		const result = await wins
+			.aggregate([{ $sort: { createdAt: -1 } }, ...winWithUserPipeline])
+			.toArray();
 
-		res.json(result.map((w) => ({ ...w, userId: w.userId.toString() })));
+		res.json(
+			result.map((w) => ({
+				...w,
+				userId: w.userId.toString(),
+				user: w.user ? { ...w.user, _id: w.user._id.toString() } : null,
+			}))
+		);
 	} catch (err) {
 		res.status(500).json({ error: "Failed to fetch wins" });
 	}
@@ -47,7 +85,6 @@ router.post("/", authRequired, upload.single("image"), async (req, res) => {
 			`data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
 			{ folder: "wall-of-fame" }
 		);
-
 		imageUrl = result.secure_url;
 	}
 
@@ -74,14 +111,30 @@ router.post("/", authRequired, upload.single("image"), async (req, res) => {
  * GET /api/wins/me
  */
 router.get("/me", authRequired, async (req, res) => {
-	const db = getDb();
-	const wins = db.collection("wins");
+	try {
+		const db = getDb();
+		const wins = db.collection("wins");
 
-	const userId = new ObjectId(req.auth.userId);
+		const userId = new ObjectId(req.auth.userId);
 
-	const result = await wins.find({ userId }).sort({ createdAt: -1 }).toArray();
+		const result = await wins
+			.aggregate([
+				{ $match: { userId } },
+				{ $sort: { createdAt: -1 } },
+				...winWithUserPipeline,
+			])
+			.toArray();
 
-	res.json(result.map((w) => ({ ...w, userId: w.userId.toString() })));
+		res.json(
+			result.map((w) => ({
+				...w,
+				userId: w.userId.toString(),
+				user: w.user ? { ...w.user, _id: w.user._id.toString() } : null,
+			}))
+		);
+	} catch (err) {
+		res.status(500).json({ error: "Failed to fetch user wins" });
+	}
 });
 
 /**
@@ -91,7 +144,6 @@ router.get("/me", authRequired, async (req, res) => {
 router.put("/:id", authRequired, async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
-
 	const { id } = req.params;
 
 	if (!ObjectId.isValid(id)) {
@@ -99,9 +151,7 @@ router.put("/:id", authRequired, async (req, res) => {
 	}
 
 	const win = await wins.findOne({ _id: new ObjectId(id) });
-	if (!win) {
-		return res.status(404).json({ error: "Win not found" });
-	}
+	if (!win) return res.status(404).json({ error: "Win not found" });
 
 	if (win.userId.toString() !== req.auth.userId) {
 		return res.status(403).json({ error: "Not your win" });
@@ -131,7 +181,6 @@ router.put("/:id", authRequired, async (req, res) => {
 router.delete("/:id", authRequired, async (req, res) => {
 	const db = getDb();
 	const wins = db.collection("wins");
-
 	const { id } = req.params;
 
 	if (!ObjectId.isValid(id)) {
@@ -139,9 +188,7 @@ router.delete("/:id", authRequired, async (req, res) => {
 	}
 
 	const win = await wins.findOne({ _id: new ObjectId(id) });
-	if (!win) {
-		return res.status(404).json({ error: "Win not found" });
-	}
+	if (!win) return res.status(404).json({ error: "Win not found" });
 
 	if (win.userId.toString() !== req.auth.userId) {
 		return res.status(403).json({ error: "Not your win" });
