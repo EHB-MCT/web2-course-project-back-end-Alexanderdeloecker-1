@@ -193,11 +193,10 @@ router.delete("/:id", authRequired, async (req, res) => {
 			return res.status(404).json({ error: "Win not found" });
 		}
 
-		if (!req.auth || !req.auth.userId) {
-			return res.status(401).json({ error: "Unauthorized" });
-		}
+		const winUserId =
+			typeof win.userId === "string" ? win.userId : win.userId.toString();
 
-		if (win.userId.toString() !== req.auth.userId) {
+		if (winUserId !== req.auth.userId) {
 			return res.status(403).json({ error: "Not your win" });
 		}
 
@@ -205,7 +204,7 @@ router.delete("/:id", authRequired, async (req, res) => {
 
 		return res.status(200).json({ message: "Win deleted" });
 	} catch (err) {
-		console.error("DELETE /wins error:", err);
+		console.error("DELETE /wins crash:", err);
 		return res.status(500).json({ error: "Server error" });
 	}
 });
