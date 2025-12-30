@@ -180,7 +180,7 @@ router.put("/:id", authRequired, async (req, res) => {
  */
 router.delete("/:id", authRequired, async (req, res) => {
 	try {
-		const db = await getDB(); // ⬅️ DIT WAS DE BUG
+		const db = getDb(); // ✅ CORRECT
 		const wins = db.collection("wins");
 		const { id } = req.params;
 
@@ -188,8 +188,9 @@ router.delete("/:id", authRequired, async (req, res) => {
 			return res.status(400).json({ error: "Invalid win id" });
 		}
 
-		const win = await wins.findOne({ _id: new ObjectId(id) });
+		const objectId = new ObjectId(id);
 
+		const win = await wins.findOne({ _id: objectId });
 		if (!win) {
 			return res.status(404).json({ error: "Win not found" });
 		}
@@ -198,7 +199,7 @@ router.delete("/:id", authRequired, async (req, res) => {
 			return res.status(403).json({ error: "Not your win" });
 		}
 
-		await wins.deleteOne({ _id: new ObjectId(id) });
+		await wins.deleteOne({ _id: objectId });
 
 		return res.status(200).json({ message: "Win deleted" });
 	} catch (err) {
@@ -206,5 +207,6 @@ router.delete("/:id", authRequired, async (req, res) => {
 		return res.status(500).json({ error: "Server error" });
 	}
 });
+
 
 export default router;
