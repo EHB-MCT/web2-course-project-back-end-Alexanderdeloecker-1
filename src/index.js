@@ -12,17 +12,8 @@ dotenv.config();
 const app = express();
 
 // middleware
-app.use(
-	cors({
-		origin: [
-			"http://localhost:5173",
-			"http://127.0.0.1:5173",
-			"https://wall-of-fame-api.onrender.com",
-		],
-		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization"],
-	})
-);
+// middleware
+app.use(cors());
 app.options("*", cors());
 
 app.use(express.json());
