@@ -19,10 +19,11 @@ app.use(
 			"http://127.0.0.1:5173",
 			"https://wall-of-fame-api.onrender.com",
 		],
-		methods: ["GET", "POST", "PUT", "DELETE"],
+		methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 		allowedHeaders: ["Content-Type", "Authorization"],
 	})
 );
+app.options("*", cors());
 
 app.use(express.json());
 
