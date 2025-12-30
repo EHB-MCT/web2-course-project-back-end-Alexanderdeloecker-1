@@ -179,7 +179,7 @@ router.put("/:id", authRequired, async (req, res) => {
  * DELETE /api/wins/:id
  */
 router.delete("/:id", authRequired, async (req, res) => {
-	const db = getDb();
+	const db = getDB();
 	const wins = db.collection("wins");
 	const { id } = req.params;
 
@@ -188,14 +188,16 @@ router.delete("/:id", authRequired, async (req, res) => {
 	}
 
 	const win = await wins.findOne({ _id: new ObjectId(id) });
-	if (!win) return res.status(404).json({ error: "Win not found" });
+	if (!win) {
+		return res.status(404).json({ error: "Win not found" });
+	}
 
 	if (win.userId.toString() !== req.auth.userId) {
 		return res.status(403).json({ error: "Not your win" });
 	}
 
-	await wins.deleteOne({ _id: win._id });
-	res.json({ message: "Win deleted" });
+	await wins.deleteOne({ _id: new ObjectId(id) });
+	res.status(200).json({ message: "Win deleted" });
 });
 
 export default router;
