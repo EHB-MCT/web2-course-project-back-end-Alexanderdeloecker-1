@@ -2,7 +2,7 @@
 # Your project name ✨
 A short description of your project. Aim for 2-3 lines. \
 
-Website url: [website.be](website.be) (optional)
+Website url: https://frolicking-centaur-5dcb19.netlify.app/profile
 
 If you want to add more sections, please do so after the existing ones (avoid burying your sources under a lot of text!).
 
