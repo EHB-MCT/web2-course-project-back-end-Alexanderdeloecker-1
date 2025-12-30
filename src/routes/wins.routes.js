@@ -180,41 +180,29 @@ router.put("/:id", authRequired, async (req, res) => {
  */
 router.delete("/:id", authRequired, async (req, res) => {
 	try {
-		const db = getDB();
+		const db = await getDB(); // ⬅️ DIT WAS DE BUG
 		const wins = db.collection("wins");
 		const { id } = req.params;
 
-		// 1. valideer ObjectId
 		if (!ObjectId.isValid(id)) {
 			return res.status(400).json({ error: "Invalid win id" });
 		}
 
-		const winId = new ObjectId(id);
+		const win = await wins.findOne({ _id: new ObjectId(id) });
 
-		// 2. haal win op
-		const win = await wins.findOne({ _id: winId });
 		if (!win) {
 			return res.status(404).json({ error: "Win not found" });
 		}
 
-		// 3. vergelijk eigenaar
-		const winUserId = win.userId?.toString();
-		const authUserId = req.auth?.userId;
-
-		if (!authUserId) {
-			return res.status(401).json({ error: "Unauthorized" });
-		}
-
-		if (winUserId !== authUserId) {
+		if (win.userId.toString() !== req.auth.userId) {
 			return res.status(403).json({ error: "Not your win" });
 		}
 
-		// 4. delete
-		await wins.deleteOne({ _id: winId });
+		await wins.deleteOne({ _id: new ObjectId(id) });
 
 		return res.status(200).json({ message: "Win deleted" });
 	} catch (err) {
-		console.error("DELETE /api/wins/:id error:", err);
+		console.error("DELETE /api/wins ERROR:", err);
 		return res.status(500).json({ error: "Server error" });
 	}
 });
