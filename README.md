@@ -1,22 +1,86 @@
-[![Open in Codespaces](https://classroom.github.com/assets/launch-codespace-2972f46106e565e64193e422d61a12cf1da4916b45550586e14ef0a7c637dd04.svg)](https://classroom.github.com/open-in-codespaces?assignment_repo_id=22094971)
-# Your project name ✨
-A short description of your project. Aim for 2-3 lines. \
+# Wall of Fame – WEB2 Backend ✨
 
-Website url: https://frolicking-centaur-5dcb19.netlify.app/profile
+This repository contains the backend API for the Wall of Fame project, a full-stack web application where users can register, log in and showcase personal achievements (“wins”). The backend handles authentication, data persistence and secure CRUD operations.
 
-If you want to add more sections, please do so after the existing ones (avoid burying your sources under a lot of text!).
+The API is consumed by a Vue 3 + Vite frontend hosted on Netlify.
 
-## Up & running (optional) 🏃‍➡️
-This should contain step by step instructions to run your project (delete this section if it's not relevant). \
-Also include login credentials or other vital information if needed.
+---
 
-## Sources 🗃️
-List **ALL your used sources** here:
-- Used a tutorial or example code? Place a link to them here. (youtube, website, github, ...) and **list the files in which they were used**.
-- Used ChatGPT? Generate a ChatGPT share link: options (three dots) > share and **list the files in which it was used**. This will not work if you have uploaded images in your prompt. In that case, add screenshots instead.
+## Tech stack
 
-It's not enough to only list the sources here, also add the sources to the top of the files in which you used them and indicate the specific parts of the code which are not your own (by writing comments and refering to the correct source(s)). \
-IF you use a source as the base/start for a file, then first place the source in the file and **COMMIT it IMMEDIATELY, BEFORE** adding your own code or modifying it. \
-**ALWAYS** use concise BUT CLEAR commit messages!
+Node.js  
+Express.js  
+MongoDB Atlas  
+JSON Web Tokens (JWT)  
+Hosting: Render  
 
-Have a look at the example repository: https://github.com/EHB-MCT/example-readme
+---
+
+## Live API
+
+Backend API (Render):  
+https://wall-of-fame-api.onrender.com
+
+---
+
+## Features
+
+User registration and login  
+JWT-based authentication  
+Secure CRUD operations for wins  
+Ownership protection (users can only edit or delete their own wins)  
+RESTful API architecture  
+MongoDB Atlas cloud database  
+
+---
+
+## Up & running (local development)
+
+1. Clone the repository  
+   git clone https://github.com/Alexanderdeloecker/web2-course-project-back-end-Alexanderdeloecker-1.git
+
+2. Install dependencies  
+   npm install
+
+3. Create a `.env` file with the following variables:  
+   PORT=3000  
+   MONGO_URI=your_mongodb_atlas_connection_string  
+   JWT_SECRET=your_secret_key  
+
+4. Start the server  
+   npm run dev
+
+5. The API will be available on  
+   http://localhost:3000
+
+---
+
+## Sources
+
+The following sources were consulted during the development of this backend:
+
+Express.js – Official Documentation  
+https://expressjs.com/
+
+Node.js – Official Documentation  
+https://nodejs.org/en/docs
+
+MongoDB Atlas – Official Documentation  
+https://www.mongodb.com/docs/atlas/
+
+JWT – Official Introduction  
+https://jwt.io/introduction
+
+W3Schools – Node.js Tutorial  
+https://www.w3schools.com/nodejs/
+
+W3Schools – Express.js Tutorial  
+https://www.w3schools.com/nodejs/nodejs_express.asp
+
+MDN Web Docs – HTTP & REST Concepts  
+https://developer.mozilla.org/en-US/docs/Web/HTTP
+
+Any external concepts inspired by these sources were adapted and implemented in my own code structure.
+
+---
+
